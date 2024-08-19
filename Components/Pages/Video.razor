@@ -1,0 +1,105 @@
+@page "/video"
+@rendermode InteractiveServer
+@using SimpleVMSBlazor.Data
+@inject CameraService CameraService
+@inject CameraState CameraState
+
+<PageTitle>Video</PageTitle>
+
+
+@if(!showingNewCameraSettingsDialog)
+{
+    <button class="btn btn-primary" @onclick="ShowNewCameraSettingsDialog"><font size="5"><b>+</b></font></button>
+}
+else
+{
+    <CameraSettingsDialog 
+        Show="@showingNewCameraSettingsDialog" 
+        OnClose="EventCallback.Factory.Create<bool>(this, HandleNewCameraSettingsDialogClose)"
+        newCamera="newCamera"
+    />
+}
+
+
+
+
+@foreach (var camera in cameras)
+{
+    <h5>@camera.Name</h5>
+    <div class="center-container" style="position: relative; margin-bottom: 20px;">
+        <VideoPlayer streamLocation="@camera.Name"/>
+        <button class="btn btn-danger remove-button" @onclick="() => RemoveCamera(camera)">&times;</button>
+    </div>
+    
+    @if (!CameraState.GetRecordingStatus(camera.Id))
+    {
+        <button class="btn btn-primary" @onclick="() => StartRecording(camera)">Start Recording</button>
+    }
+    else
+    {
+        <button class="btn btn-primary" @onclick="() => StopRecording(camera)">Stop Recording</button>
+    }
+}
+
+
+
+@code {
+    private bool showingNewCameraSettingsDialog;
+    private List<Camera> cameras = new List<Camera>();
+    private Camera newCamera;
+
+    protected override async Task OnInitializedAsync()
+    {
+        cameras = await CameraService.GetCamerasAsync();
+    }
+
+    public string GetUrl(Camera camera)
+    {
+        return $"http://{camera.Username}:{camera.Password}@{camera.Address}/axis-cgi/mjpg/video.cgi";
+    }
+
+    public async Task AddCamera(Camera camera)
+    {
+        if (!string.IsNullOrWhiteSpace(camera.Username) && !string.IsNullOrWhiteSpace(camera.Password) && !string.IsNullOrWhiteSpace(camera.Address))
+        {
+            await CameraService.AddCameraAsync(camera);
+            cameras = await CameraService.GetCamerasAsync(); // Refresh the camera list
+        }
+        showingNewCameraSettingsDialog = false;
+    }
+
+    private void ShowNewCameraSettingsDialog()
+    {
+        newCamera = new Camera();
+        showingNewCameraSettingsDialog = true;
+    }
+
+    private async void HandleNewCameraSettingsDialogClose(bool value)
+    {
+        Console.WriteLine(newCamera.Username);
+        await AddCamera(newCamera);
+        showingNewCameraSettingsDialog = false;
+    }
+
+    private async Task RemoveCamera(Camera camera)
+    {
+        await CameraService.DeleteCameraAsync(camera.Id);
+        cameras = await CameraService.GetCamerasAsync();
+    }
+
+    private async Task StartRecording(Camera camera)
+    {
+        camera.Recording = true;
+        await CameraService.UpdateCameraAsync(camera);
+        cameras = await CameraService.GetCamerasAsync();
+        CameraState.SetRecordingStatus(camera.Id, true);
+    }
+
+    private async Task StopRecording(Camera camera)
+    {
+        camera.Recording = false;
+        await CameraService.UpdateCameraAsync(camera);
+        cameras = await CameraService.GetCamerasAsync();
+        CameraState.SetRecordingStatus(camera.Id, false);
+    }
+}

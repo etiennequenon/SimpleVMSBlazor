@@ -1,0 +1,15 @@
+@page "/video-player"
+@inject IJSRuntime JSRuntime
+
+<video id="videoPlayer" width="800" controls autoplay></video>
+
+@code {
+    [Parameter] public string? streamLocation { get; set; }
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            JSRuntime.InvokeVoidAsync("initializeHlsPlayer", "/hls/" + streamLocation + "/stream.m3u8");
+        }
+    }
+}

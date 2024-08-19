@@ -1,0 +1,32 @@
+@using SimpleVMSBlazor.Data
+
+@code {
+    [Parameter] public EventCallback<Camera> OnCameraAdded { get; set; }
+    
+    private Camera newCamera = new Camera();
+
+    private async Task AddCamera()
+    {
+        await OnCameraAdded.InvokeAsync(newCamera);
+        newCamera = new Camera();
+    }
+}
+
+<EditForm Model="newCamera" OnValidSubmit="AddCamera">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="ipAddress">IP Address</label>
+        <InputText id="ipAddress" class="form-control" @bind-Value="newCamera.Address" />
+    </div>
+    <div class="form-group">
+        <label for="username">Username</label>
+        <InputText id="username" class="form-control" @bind-Value="newCamera.Username" />
+    </div>
+    <div class="form-group">
+        <label for="password">Password</label>
+        <InputText id="password" type="password" class="form-control" @bind-Value="newCamera.Password" />
+    </div>
+    <button type="submit" class="btn btn-primary">Add Camera</button>
+</EditForm>

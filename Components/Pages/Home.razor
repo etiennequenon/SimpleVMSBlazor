@@ -1,0 +1,32 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+
+<PageTitle>Home</PageTitle>
+
+<button class="btn btn-primary" @onclick="ShowModal">Click Here</button>
+
+<Modal1 Title="My first Modal dialog" Show="showModal" OnCancel="HandleCancel" OnConfirm="HandleConfirm">
+    <p>
+        This is my first modal dialog
+    </p>
+</Modal1>
+
+@code {
+    private bool showModal = false;
+
+    private void HandleCancel()
+    {
+        showModal = false;
+    }
+
+    private void HandleConfirm()
+    {
+        showModal = false;
+    }
+
+    private void ShowModal()
+    {
+        showModal = true;
+    }
+}

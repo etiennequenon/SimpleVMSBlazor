@@ -1,0 +1,49 @@
+@using SimpleVMSBlazor.Data
+
+<div class="modal-backdrop" style="display:@(Show ? "block" : "none")"></div>
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">New Camera</h5>
+            <button type="button" class="close" @onclick="AddCamera">&times;</button>
+        </div>
+        <div class="modal-body">
+            <label>Name: </label>
+            <input type="text" @bind="newCamera.Name"><br/>
+            <label>IP Address: </label>
+            <input type="text" @bind="newCamera.Address"><br/>
+            <label>User: </label>
+            <input type="text" @bind="newCamera.Username"><br/>
+            <label>Password: </label>
+            <input type="password" @bind="newCamera.Password"><br/>
+            <label>Retention period: </label>
+            <input type="range" min="1" max="30" step="1" @bind="newCamera.RecordingRententionPeriod" @bind:event="oninput" />
+            <span class="size-label">
+                @(newCamera.RecordingRententionPeriod) Days
+            </span>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" @onclick="AddCamera">Add</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback<bool> OnClose { get; set; }
+    [Parameter] public EventCallback<Camera> OnCreation { get; set; }
+    [Parameter] public bool Show { get; set; }
+    [Parameter] public Camera newCamera { get; set; }
+
+    private void AddCamera()
+    {
+        Show = false;
+        OnCreation.InvokeAsync(newCamera);
+        OnClose.InvokeAsync(false);
+    }
+
+    private void Close()
+    {
+        Show = false;
+        OnClose.InvokeAsync(false);
+    }
+}

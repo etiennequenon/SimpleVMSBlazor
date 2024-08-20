@@ -1,15 +1,26 @@
 @page "/video-player"
 @inject IJSRuntime JSRuntime
 
-<video id="videoPlayer" width="800" controls autoplay></video>
+<video id="@_videoPlayerId" width="800" controls autoplay></video>
 
 @code {
     [Parameter] public string? streamLocation { get; set; }
+    private string _videoPlayerId;
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
         {
-            JSRuntime.InvokeVoidAsync("initializeHlsPlayer", "/hls/" + streamLocation + "/stream.m3u8");
+            JSRuntime.InvokeVoidAsync("initializeHlsPlayer", _videoPlayerId, "/hls/" + streamLocation + "/stream.m3u8");
         }
+    }
+
+    private string GenerateVideoPlayerId()
+    {
+        return Guid.NewGuid().ToString();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _videoPlayerId = GenerateVideoPlayerId();
     }
 }

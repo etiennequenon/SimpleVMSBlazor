@@ -1,5 +1,5 @@
-window.initializeHlsPlayer = (url) => {
-    const video = document.getElementById('videoPlayer');
+window.initializeHlsPlayer = (videoElementId, url) => {
+    const video = document.getElementById(videoElementId);
     if (Hls.isSupported()) {
         const hls = new Hls();
         hls.loadSource(url);
